@@ -1,15 +1,17 @@
-# Petalinux Dockerfile
+# Generic Petalinux Dockerfile
 
 A somehow generic Xilinx PetaLinux+SDK docker file, using Ubuntu (though some tweaks might be possible for Windows).
+
+It was successfully tested with version `2017.4` and `2018.2`.
 
 > **Caution**: some modifications are to be performed on Xilinx files to make it compliant with unattended installation!* Xilinx is supposed to provide better options starting from `2018.3`.
 Inspired by [docker-xilinx-petalinux-desktop](https://github.com/JamesAnthonyLow/docker-xilinx-petalinux-desktop) (and some of [petalinux-docker](https://github.com/xaljer/petalinux-docker)).
 
-# Prepare installers
+## Prepare installers
 
 SDK and PetaLinux installers are to be downloaded from [Xilinx website](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html). They need to be prepared for unattended installation.
 
-## SDK
+### SDK
 
 You need to get the unattended-install-compliant SDK archive, linked to your Xilinx account:
 1. Download the SDK installer `Xilinx_SDK_XXXX.X_YYYY_ZZZZ_Lin64.bin` (e.g. `Xilinx_SDK_2018.2_0614_1954_Lin64.bin`)
@@ -21,12 +23,11 @@ You need to get the unattended-install-compliant SDK archive, linked to your Xil
 7. Select `Linux` for the `Download files to create full image for selected platform(s)`. **Do not select `Zip archive`!** It will mess up file attributes and the installer will fail.
 8. Click `Next >`
 9. Click `Download`
-10. Go the `SDK` directory and type: `tar -czf ../Xilinx-SDK-vXXXX.X.tgz *`
-11. Remove the `SDK` directory
+10. When the download is finished, go to `resource` and run `./package_SDK.sh`. It will get the SDK version from the `SDK` directory and package it for Docker build.
 
 You can modify the `install_config_sdk.txt` to fine-tune the options, but the default is fine.
 
-## PetaLinux
+### PetaLinux
 
 We need to patch the petalinux installer so it does not ask to accept licences.
 
@@ -36,31 +37,31 @@ In `resources`, run:
 
     ./patch_petalinux_installer.sh /path/to/petalinux-vXXX.X-final-installer.run
 
-(that will extract the script header to `/tmp/plsh` and archive to `/tmp/plbin` then merge them back together to `resources/petalinux-vXXX.X-final-installer.run`).
+(that will extract the script header to `/tmp/plsh` and archive to `/tmp/plbin` then merge them back together to `resources/petalinux-vXXX.X-final-installer.run` in `resources` directory).
 
 
-# Build the image
+## Build the image
 
 Run:
 
-    ./build.sh <VERSION>
+    ./docker_build.sh <VERSION>
 
-or:
+The `docker_build.sh` will automatically spawn a simple HTTP server to serve the installers instead of copying them to the docker images (especially pushing them to the Docker daemon. Big space/time saver).
 
-    python -m SimpleHTTPServer &
-    docker build . -t petalinux:<VERSION> --build-arg XILVER=<VERSION>
-
-The `build.sh` will automatically spawn a simple HTTP server to server the installers instead of copying them to the docker images (big space saver).
-
-The image should take a long time to build (up to a couple hours, depending on disk space and system use), but should succeed.
+The image takes a long time to build (up to a couple hours, depending on disk space and system use), but should succeed.
 
 
-# Compile a PetaLinux project
+## Work with a PetaLinux project
 
-A helper script `petalin` is provided that should be run *inside* a petalinux project:
+A helper script `petalin.sh` is provided that should be run *inside* a petalinux project:
 
-    docker run -ti -v "$PWD":"$PWD" -u petalinux -w "$PWD" petalinux $@
+    docker run -ti -v "$PWD":"$PWD" -u petalinux -w "$PWD" petalinux:<latest version> $@
 
-When run without arguments, a shell will spawn, *with PetaLinux and SDK `settings.sh` sourced*, so you can directly execute `petalinux-*` commands. Otherwise, the arguments will be executed as a command. E.g:
+When run without arguments, a shell will spawn, *with PetaLinux and SDK `settings.sh` already sourced*, so you can directly execute `petalinux-*` commands.
 
-    ./petalin petalinux-build
+    user@host:/path/to/petalinux_project$ /path/to/petalin.sh
+    petalinux@a3ce6f8c:/path/to/petalinux_project$ petalinux-build
+
+Otherwise, the arguments will be executed as a command. E.g:
+
+    user@host:/path/to/petalinux_project$ /path/to/petalin.sh petalinux-build

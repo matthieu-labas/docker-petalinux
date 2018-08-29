@@ -1,3 +1,0 @@
-#!/bin/bash
-# Run from a PetaLinux project directory
-docker run -ti -v "$PWD":"$PWD" -u petalinux -w "$PWD" petalinux $@
