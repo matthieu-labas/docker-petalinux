@@ -1,0 +1,4 @@
+resources/*.run
+resources/*.tar
+resources/*.tgz
+resources/*.tar.gz
