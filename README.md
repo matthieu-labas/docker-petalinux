@@ -81,10 +81,11 @@ You can fully customize the installation by manually running e.g.:
 
     docker build . -t petalinux:2017.4 \
         --build-arg XILVER=2017.4 \
-        --build-arg SDK_FILE=/path/to/Xilinx_SDK_v2017.4-patched.tar.gz \
-        --build-arg PETALINX_INSTALLER=/path/to/petalinux-v2017.4-final-patched.run \
+        --build-arg SDK_FILE=SDK/Xilinx_SDK_v2017.4-patched.tar.gz \
+        --build-arg PETALINX_INSTALLER=petalinux/petalinux-v2017.4-final-patched.run \
         --build-arg HTTP_SERV=https://local.company.com/dockers/petalinux/2017.4/resources
 
+The SDK will be retrieved at `https://local.company.com/dockers/petalinux/2017.4/resources/SDK/Xilinx_SDK_v2017.4-patched.tar.gz` and petalinux at `https://local.company.com/dockers/petalinux/2017.4/resources/petalinux/petalinux-v2017.4-final-patched.run`
 
 ## Work with a PetaLinux project
 
