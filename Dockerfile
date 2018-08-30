@@ -6,13 +6,18 @@ ARG XILVER=2018.2
 # The SDK installer *GENERATED FROM THE WebInstall WITH OPTION "Extract to directory" (and zip)*
 # SDK will be installed in /opt/Xilinx/SDK/${XILVER}
 # File is expected in the "resources" subdirectory
-ARG SDK_FILE=Xilinx-SDK-v${XILVER}.tgz
+ARG SDK_INSTALLER=Xilinx-SDK-v${XILVER}.tgz
+
 # The PetaLinux base. We expect ${PETALINUX_BASE}-installer.run to be the patched installer.
 # PetaLinux will be installed in /opt/${PETALINX_BASE}
 # File is expected in the "resources" subdirectory
 ARG PETALINUX_BASE=petalinux-v${XILVER}-final
-# The HTTP server to retrieve the files from. It should be accessible by the Docker daemon
-ARG host_ip=172.17.0.1
+
+# The PetaLinux runnable installer
+ARG PETALINUX_INSTALLER=${PETALINUX_BASE}-installer.run
+
+# The HTTP server to retrieve the files from. It should be accessible by the Docker daemon as ${HTTP_SERV}/${SDK_INSTALLER}
+ARG HTTP_SERV=http://172.17.0.1:8000/resources
 
 RUN dpkg --add-architecture i386
 RUN apt-get update
@@ -85,8 +90,8 @@ USER petalinux
 
 # Install SDK
 #COPY resources/install_config_sdk.txt .
-RUN mkdir t && cd t && wget -q ${host_ip}:8000/resources/install_config_sdk.txt \
-	&& wget -q -O - ${host_ip}:8000/resources/${SDK_FILE} | tar -xz \
+RUN mkdir t && cd t && wget -q ${HTTP_SERV}/install_config_sdk.txt \
+	&& wget -q -O - ${HTTP_SERV}/${SDK_INSTALLER} | tar -xz \
 	&& ./xsetup -b Install -a XilinxEULA,3rdPartyEULA,WebTalkTerms -c install_config_sdk.txt \
 	&& cd .. && rm -rf t \
 	&& echo "source /opt/Xilinx/SDK/${XILVER}/settings64.sh" >> ~/.bashrc \
@@ -94,10 +99,10 @@ RUN mkdir t && cd t && wget -q ${host_ip}:8000/resources/install_config_sdk.txt 
 
 # Install PetaLinux
 RUN chown -R petalinux:petalinux . \
-	&& wget -q ${host_ip}:8000/resources/${PETALINUX_BASE}-installer.run \
-	&& chmod a+x ${PETALINUX_BASE}-installer.run \
-	&& ./${PETALINUX_FILE}${PETALINUX_BASE}-installer.run /opt/${PETALINUX_BASE} \
-	&& rm -f ./${PETALINUX_BASE}-installer.run \
+	&& wget -q ${HTTP_SERV}/${PETALINUX_INSTALLER} \
+	&& chmod a+x ${PETALINUX_INSTALLER} \
+	&& ./${PETALINUX_FILE}${PETALINUX_INSTALLER} /opt/${PETALINUX_BASE} \
+	&& rm -f ./${PETALINUX_INSTALLER} \
 	&& rm -f petalinux_installation_log
 
 # Source settings at login

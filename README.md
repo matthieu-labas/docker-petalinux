@@ -4,8 +4,9 @@ A somehow generic Xilinx PetaLinux+SDK docker file, using Ubuntu (though some tw
 
 It was successfully tested with version `2017.4` and `2018.2`.
 
-> **Caution**: some modifications are to be performed on Xilinx files to make it compliant with unattended installation!* Xilinx is supposed to provide better options starting from `2018.3`.
-Inspired by [docker-xilinx-petalinux-desktop](https://github.com/JamesAnthonyLow/docker-xilinx-petalinux-desktop) (and some of [petalinux-docker](https://github.com/xaljer/petalinux-docker)).
+> **Caution**: some modifications are to be performed on Xilinx files to make it compliant with unattended installation! Xilinx is supposed to provide better options starting from `2018.3`.
+
+>Inspired by [docker-xilinx-petalinux-desktop](https://github.com/JamesAnthonyLow/docker-xilinx-petalinux-desktop) (and some of [petalinux-docker](https://github.com/xaljer/petalinux-docker)).
 
 ## Prepare installers
 
@@ -56,6 +57,33 @@ The `docker_build.sh` will automatically spawn a simple HTTP server to serve the
 The image takes a long time to build (up to a couple hours, depending on disk space and system use), but should succeed.
 
 It weighs around 33 GB.
+
+### Parameters
+
+Several arguments can be provided to customize the build, with `--build-arg`:
+
+* `XILVER` for the Xilinx version to install. The `Dockerfile` expects to find `${HTTP_SERVER}/Xilinx-SDK-v${XILVER}.tgz` for the SDK installer (unless `SDK_INSTALLER` is given), and `${HTTP_SERVER}/petalinux-v${XILVER}-final-installer.run` for the PetaLinux installer (unless `PETALINUX_INSTALLER` is given).
+<br/>Defaults to `2018.2`.
+
+* `SDK_INSTALLER` is the name of the SDK installer archive.
+<br/>Defaults to `Xilinx-SDK-v${XILVER}.tgz`
+
+* `PETALINUX_BASE` is the name of the PetaLinux base. Petalinux will be installed in `/opt/${PETALINUX_BASE}` and the installer is expected to be sourced from `resources/${PETALINUX_BASE}-installer.run`.
+<br/>Defaults to `petalinux-v${XILVER}-final`.
+
+* `PETALINUX_INSTALLER` is the PetaLinux installer file.
+<br/>Defaults to `${PETALINUX_BASE}-installer.run`
+
+* `HTTP_SERV` is the HTTP server serving both SDK and PetaLinux installer.
+<br/>Defaults to `http://172.17.0.1:8000/resources`.
+
+You can fully customize the installation by manually running e.g.:
+
+    docker build . -t petalinux:2017.4 \
+        --build-arg XILVER=2017.4 \
+        --build-arg SDK_FILE=/path/to/Xilinx_SDK_v2017.4-patched.tar.gz \
+        --build-arg PETALINX_INSTALLER=/path/to/petalinux-v2017.4-final-patched.run \
+        --build-arg HTTP_SERV=https://local.company.com/dockers/petalinux/2017.4/resources
 
 
 ## Work with a PetaLinux project
