@@ -77,7 +77,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8 
 
 # Add user 'petalinux' with password 'petalinux' and give it access to install directory /opt
-RUN useradd -m -G dialout -p '$6$wiu9XEXx$ITRrMySAw1SXesQcP.Bm3Su2CuaByujc6Pb7Ztf4M9ES2ES7laSRwdcbgG96if4slduUxyjqvpEq2I0OhxKCa1' petalinux \
+RUN useradd -m -G dialout,sudo -p '$6$wiu9XEXx$ITRrMySAw1SXesQcP.Bm3Su2CuaByujc6Pb7Ztf4M9ES2ES7laSRwdcbgG96if4slduUxyjqvpEq2I0OhxKCa1' petalinux \
 	&& chmod +w /opt \
 	&& chown -R petalinux:petalinux /opt \
 	&& mkdir /opt/${PETALINUX_BASE} \
