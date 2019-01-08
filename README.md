@@ -35,7 +35,7 @@ You can modify the `install_config_sdk.txt` to fine-tune the options, but the de
 
 We need to patch the petalinux installer so it does not ask to accept licences.
 
-> N.B. I'm not sure it's completely legal; but I haven't been able to script an `expect` to automatically accept them (which might not be legal as well anyway). So we'll consider your download means you accept those licences (which are available in the petalinux install directory)*
+> N.B. I'm not sure it's completely legal; but I haven't been able to script an `expect` to automatically accept them (which might not be legal as well anyway). So we'll consider your download means you accept those licences (which are available in the petalinux install directory)
 
 In `resources`, run:
 
@@ -82,7 +82,7 @@ You can fully customize the installation by manually running e.g.:
     docker build . -t petalinux:2017.4 \
         --build-arg XILVER=2017.4 \
         --build-arg SDK_FILE=SDK/Xilinx_SDK_v2017.4-patched.tar.gz \
-        --build-arg PETALINX_INSTALLER=petalinux/petalinux-v2017.4-final-patched.run \
+        --build-arg PETALINUX_INSTALLER=petalinux/petalinux-v2017.4-final-patched.run \
         --build-arg HTTP_SERV=https://local.company.com/dockers/petalinux/2017.4/resources
 
 The SDK will be retrieved at `https://local.company.com/dockers/petalinux/2017.4/resources/SDK/Xilinx_SDK_v2017.4-patched.tar.gz` and petalinux at `https://local.company.com/dockers/petalinux/2017.4/resources/petalinux/petalinux-v2017.4-final-patched.run`
