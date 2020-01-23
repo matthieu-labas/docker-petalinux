@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Default version 2018.2
-XILVER=${1:-2018.2}
+# Default version 2019.1
+XILVER=${1:-2019.1}
 
 # Check SDK and petalinux installers exists
 SDK="resources/Xilinx-SDK-v${XILVER}.tgz"
@@ -12,8 +12,13 @@ if [ ! -f "$SDK" -o ! -f "$PLNX" ] ; then
 fi
 
 # Check HTTP server is running
-if ! ps -fC python | grep "SimpleHTTPServer" > /dev/null ; then
-	python -m SimpleHTTPServer &
+PYTHONV=$(python --version 2>&1 | cut -f2 -d' ')
+case $PYTHONV in
+	3*) PYTHONHTTP="http.server" ;;
+	*) PYTHONHTTP="SimpleHTTPServer" ;;
+esac
+if ! ps -fC python | grep "$PYTHONHTTP" > /dev/null ; then
+	python -m "$PYTHONHTTP" &
 	HTTPID=$!
 	echo "HTTP Server started as PID $HTTPID"
 	trap "kill $HTTPID" EXIT KILL QUIT SEGV INT HUP TERM ERR

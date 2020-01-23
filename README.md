@@ -2,7 +2,9 @@
 
 A somehow generic Xilinx PetaLinux+SDK docker file, using Ubuntu (though some tweaks might be possible for Windows).
 
-It was successfully tested with version `2017.4` and `2018.2`.
+It was successfully tested with version `2017.4` up to `2019.1`, *which is the last version handled by this release*.
+
+**STARTING FROM 2019.2 THE SDK IS PART OF THE VITIS PLATFORM! It will be handled in future releases.**
 
 > **Caution**: some modifications are to be performed on Xilinx files to make it compliant with unattended installation! Xilinx is supposed to provide better options starting from `2018.3`.
 
@@ -41,8 +43,7 @@ In `resources`, run:
 
     ./patch_petalinux_installer.sh /path/to/petalinux-vXXX.X-final-installer.run
 
-(that will extract the script header to `/tmp/plsh` and archive to `/tmp/plbin` then merge them back together to `resources/petalinux-vXXX.X-final-installer.run` in `resources` directory).
-
+(that will patch the installer *in place*).
 
 ## Build the image
 
@@ -51,6 +52,7 @@ Run:
     ./docker_build.sh <VERSION>
 
 > `<VERSION>` can be `2017.4`, `2018.2`, ...
+> Corresponding petalinux and SDK files are expected to be found in `resources` directory.
 
 The `docker_build.sh` will automatically spawn a simple HTTP server to serve the installers instead of copying them to the docker images (especially pushing them to the Docker daemon. Big space/time saver).
 

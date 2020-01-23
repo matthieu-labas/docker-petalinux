@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
 # The Xilinx toolchain version
-ARG XILVER=2018.2
+ARG XILVER=2019.1
 
 # The SDK installer *GENERATED FROM THE WebInstall WITH OPTION "Extract to directory" (and zip)*
 # SDK will be installed in /opt/Xilinx/SDK/${XILVER}
@@ -19,9 +19,7 @@ ARG PETALINUX_INSTALLER=${PETALINUX_BASE}-installer.run
 # The HTTP server to retrieve the files from. It should be accessible by the Docker daemon as ${HTTP_SERV}/${SDK_INSTALLER}
 ARG HTTP_SERV=http://172.17.0.1:8000/resources
 
-RUN dpkg --add-architecture i386
-RUN apt-get update
-RUN apt-get install -y \ 
+RUN dpkg --add-architecture i386 && apt-get update && apt-get install -y \ 
 	python3.4 \
 	tofrodos \
 	iproute2 \
@@ -64,7 +62,8 @@ RUN apt-get install -y \
 	pax \
 	gzip \
 	vim \
-	libgtk2.0-0
+	libgtk2.0-0 \
+	&& apt-get autoremove --purge && apt-get autoclean
 
 RUN echo "%sudo ALL=(ALL:ALL) ALL" >> /etc/sudoers \
 	&& echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
@@ -101,7 +100,7 @@ RUN mkdir t && cd t && wget -q ${HTTP_SERV}/install_config_sdk.txt \
 RUN chown -R petalinux:petalinux . \
 	&& wget -q ${HTTP_SERV}/${PETALINUX_INSTALLER} \
 	&& chmod a+x ${PETALINUX_INSTALLER} \
-	&& ./${PETALINUX_FILE}${PETALINUX_INSTALLER} /opt/${PETALINUX_BASE} \
+	&& SKIP_LICENSE=y ./${PETALINUX_FILE}${PETALINUX_INSTALLER} /opt/${PETALINUX_BASE} \
 	&& rm -f ./${PETALINUX_INSTALLER} \
 	&& rm -f petalinux_installation_log
 
