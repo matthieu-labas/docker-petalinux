@@ -1,12 +1,7 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # The Xilinx toolchain version
-ARG XILVER=2019.1
-
-# The SDK installer *GENERATED FROM THE WebInstall WITH OPTION "Extract to directory" (and zip)*
-# SDK will be installed in /opt/Xilinx/SDK/${XILVER}
-# File is expected in the "resources" subdirectory
-ARG SDK_INSTALLER=Xilinx-SDK-v${XILVER}.tgz
+ARG XILVER=2022.2
 
 # The PetaLinux base. We expect ${PETALINUX_BASE}-installer.run to be the patched installer.
 # PetaLinux will be installed in /opt/${PETALINX_BASE}
@@ -19,8 +14,15 @@ ARG PETALINUX_INSTALLER=${PETALINUX_BASE}-installer.run
 # The HTTP server to retrieve the files from. It should be accessible by the Docker daemon as ${HTTP_SERV}/${SDK_INSTALLER}
 ARG HTTP_SERV=http://172.17.0.1:8000/resources
 
-RUN dpkg --add-architecture i386 && apt-get update && apt-get install -y \ 
-	python3.4 \
+# Make tzdata package install non interactive. See https://serverfault.com/a/1016972/308291
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
+RUN dpkg --add-architecture i386 && apt-get update && apt-get install -y \
+	python3 \
+	bc \
+	rsync \
+	apt-utils \
 	tofrodos \
 	iproute2 \
 	gawk \
@@ -87,24 +89,15 @@ RUN useradd -m -G dialout,sudo -p '$6$wiu9XEXx$ITRrMySAw1SXesQcP.Bm3Su2CuaByujc6
 WORKDIR /opt
 USER petalinux
 
-# Install SDK
-#COPY resources/install_config_sdk.txt .
-RUN mkdir t && cd t && wget -q ${HTTP_SERV}/install_config_sdk.txt \
-	&& wget -q -O - ${HTTP_SERV}/${SDK_INSTALLER} | tar -xz \
-	&& ./xsetup -b Install -a XilinxEULA,3rdPartyEULA,WebTalkTerms -c install_config_sdk.txt \
-	&& cd .. && rm -rf t \
-	&& echo "source /opt/Xilinx/SDK/${XILVER}/settings64.sh" >> ~/.bashrc \
-	&& echo "source /opt/${PETALINUX_BASE}/settings.sh" >> ~/.bashrc
-
 # Install PetaLinux
 RUN chown -R petalinux:petalinux . \
 	&& wget -q ${HTTP_SERV}/${PETALINUX_INSTALLER} \
 	&& chmod a+x ${PETALINUX_INSTALLER} \
-	&& SKIP_LICENSE=y ./${PETALINUX_FILE}${PETALINUX_INSTALLER} /opt/${PETALINUX_BASE} \
+	&& SKIP_LICENSE=y ./${PETALINUX_FILE}${PETALINUX_INSTALLER} --skip_license --dir /opt/${PETALINUX_BASE} \
 	&& rm -f ./${PETALINUX_INSTALLER} \
 	&& rm -f petalinux_installation_log
 
 # Source settings at login
 USER root
-RUN echo "source /opt/Xilinx/SDK/${XILVER}/settings64.sh" >> /etc/profile \
-	&& echo "source /opt/${PETALINUX_BASE}/settings.sh" >> /etc/profile
+RUN echo "source /opt/${PETALINUX_BASE}/settings.sh" >> /etc/bash.bashrc
+
